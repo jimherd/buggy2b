@@ -45,12 +45,13 @@ int _column;
 
 void TextLCD_init(void) 
 {
-int  i;
+uint8_t  i;
 //
 // Initialise pointer to MCP23017 object
 //
+DelayMs(1);
     MCP23017_config(0x0F00, 0x0F00, 0x0F00);
-    
+DelayMs(1);    
     _rows = 2;
     _columns = 16;
 
@@ -58,7 +59,7 @@ int  i;
     TextLCD_e(0);
     TextLCD_rs(0); // command mode
     
-    DelayS(DISPLAY_INIT_DELAY_SECS);     
+    DelayMs(DISPLAY_INIT_DELAY_MSECS);     
 
 //
 // interface defaults to an 8-bit interface. However, we need to ensure that we
@@ -82,7 +83,7 @@ int  i;
     TextLCD_writeNibble(CMD_NULL); DelayMs(5);
     TextLCD_writeNibble(CMD_NULL);  
     
-    DelayS(DISPLAY_INIT_DELAY_SECS);    
+    DelayMs(DISPLAY_INIT_DELAY_MSECS);    
       
     TextLCD_writeNibble(CMD4_SET_4_BIT_INTERFACE);       // 0x02 - now force into 4-bit mode   
     DelayMs(5); 
@@ -132,7 +133,7 @@ int  address;
 
 void TextLCD_cls() {
     TextLCD_writeCommand(CMD_CLEAR_DISPLAY);  // 0x01
-    DelayS(DISPLAY_CLEAR_DELAY);        // 
+    DelayMs(DISPLAY_CLEAR_DELAY);        // 
     TextLCD_locate(0, 0);
 }
 
@@ -162,7 +163,7 @@ void TextLCD_writeByte(uint8_t value) {
 void TextLCD_writeCommand(uint8_t command) {
     TextLCD_rs(0);
     TextLCD_writeByte(command);
-    DelayS(DISPLAY_CMD_DELAY);
+    DelayMs(DISPLAY_CMD_DELAY);
 }
 
 void TextLCD_writeData(uint8_t data) {

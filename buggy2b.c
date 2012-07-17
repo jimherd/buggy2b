@@ -288,9 +288,20 @@ void init(void)
 //
     DelayMs(1000);
     I2C_Open(MASTER, SLEW_OFF);
-    SSPADD= I2C_100KHZ; 
+    SSPADD = I2C_100KHZ; 
     I2C_Idle();
     DelayMs(1);
+//
+// Initialise the MCP23017 I/O device
+//
+	MCP23017_reset(0x20);
+    MCP23017_write_bit(1,BL_BIT);   // BL_BIT
+    MCP23017_write_bit(1,15);       // LED_4
+
+	TextLCD_init();
+	TextLCD_putc('K');
+
+   MCP23017_write_bit(1,14);       // LED_4
 
     return;
 }

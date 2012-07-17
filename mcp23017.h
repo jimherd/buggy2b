@@ -47,14 +47,14 @@
 
 /** MCP23017_reset : Reset MCP23017 device to its power-on state
  */    
-void MCP23017_reset(void);
+void MCP23017_reset(uint8_t  i2c_address);
 
 /** MCP23017_write_bit : Write a 0/1 value to an output bit
  *
  * @param   value         0 or 1
  * @param   bit_number    bit number range 0 --> 15
  */   
-void MCP23017_write_bit(int value, int bit_number);
+void MCP23017_write_bit(uint8_t value, uint8_t bit_number);
       
 /** MCP23017_write_mask : Write a masked 16-bit value to the device
  *

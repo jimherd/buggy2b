@@ -1,6 +1,4 @@
-/* draft mbed TextLCD 
- * (c) 2007/8, sford
- */
+
  
 #ifndef WATTBOB_TEXTLCD_H
 #define WATTBOB_TEXTLCD_H
@@ -68,9 +66,9 @@
 //
 // Misc 2*16 character display constants
 //
-#define     DISPLAY_INIT_DELAY_SECS    0.5f       // 500mS
-#define     DISPLAY_CLEAR_DELAY        0.01f      // 10 mS (spec is 6.2mS)
-#define     DISPLAY_CMD_DELAY          0.005f     // delay to allow command to complete
+#define     DISPLAY_INIT_DELAY_MSECS    500       // 500mS
+#define     DISPLAY_CLEAR_DELAY          10       // 10 mS (spec is 6.2mS)
+#define     DISPLAY_CMD_DELAY             5       // delay to allow command to complete
 
 /** Class to access 16*2 LCD display connected to an MCP23017 I/O extender chip
  *

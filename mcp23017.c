@@ -19,25 +19,28 @@
 #include	"defines.h"
 
 //
-// create an I2C data structure for the LCD03 display unit
+// create an I2C data structure for the (2*20) 7-segment interface unit
 //
 I2C_STRUCT   MCP23017_command;
 
-int     MCP23017_i2cAddress;        // physical I2C address
-uint16_t	shadow_GPIO, shadow_IODIR, shadow_GPPU, shadow_IPOL;     // Cached copies of the register values
+uint8_t      MCP23017_i2cAddress;        // physical I2C address
+uint16_t     shadow_GPIO, shadow_IODIR, shadow_GPPU, shadow_IPOL;     // Cached copies of the register values
 
 union {
     uint8_t  value8[2];
     uint16_t value16;
 } tmp_data;
 
-/*-----------------------------------------------------------------------------
- * reset
- * Set configuration (IOCON) and direction(IODIR) registers to initial state
- */
-void MCP23017_reset() 
+//-----------------------------------------------------------------------------
+// MCP23017_reset
+// --------------
+// Set configuration (IOCON) and direction(IODIR) registers to initial state
+//
+void MCP23017_reset(uint8_t  i2c_address) 
 {
 int  reg_addr;
+
+	MCP23017_i2cAddress	= i2c_address;
 //
 // First make sure that the device is in BANK=0 mode
 //
@@ -65,11 +68,11 @@ int  reg_addr;
  * write_bit
  * Write a 1/0 to a single bit of the 16-bit port
  */
-void MCP23017_write_bit(int value, int bit_number) {
+void MCP23017_write_bit(uint8_t value, uint8_t bit_number) {
     if (value == 0) {
-        shadow_GPIO &= ~(1 << bit_number);
+        shadow_GPIO &= ~((uint16_t)1 << bit_number);
     } else {
-        shadow_GPIO |= 1 << bit_number;
+        shadow_GPIO |= (uint16_t)1 << bit_number;
     }
     MCP23017_writeRegister_uint16(GPIO, (uint16_t)shadow_GPIO);
 }
@@ -116,8 +119,8 @@ void MCP23017_config(uint16_t dir_config, uint16_t pullup_config,  uint16_t pola
  * writeRegister
  * write a byte
  */
-void MCP23017_writeRegister_uint8(uint8_t regAddress, uint8_t data) {
-    char  buffer[2];
+void MCP23017_writeRegister_uint8(uint8_t regAddress, uint8_t data) 
+{
 
     MCP23017_command.cmd[0] = MCP23017_i2cAddress;
     MCP23017_command.cmd[1] = regAddress;
@@ -126,11 +129,6 @@ void MCP23017_writeRegister_uint8(uint8_t regAddress, uint8_t data) {
     MCP23017_command.get_count = 0;
     MCP23017_command.delay = 0;
     exec_command(&MCP23017_command, WRITE_ONLY);
-
-
-//    buffer[0] = regAddress;
-//    buffer[1] = data;
-//    _i2c.write(MCP23017_i2cAddress, buffer, 2);
 }
 
 /*----------------------------------------------------------------------------
@@ -139,7 +137,7 @@ void MCP23017_writeRegister_uint8(uint8_t regAddress, uint8_t data) {
  */ 
 void MCP23017_writeRegister_uint16(uint8_t regAddress, uint16_t data) 
 {
-char  buffer[3];
+    tmp_data.value16 = data;
 
     MCP23017_command.cmd[0] = MCP23017_i2cAddress;
     MCP23017_command.cmd[1] = regAddress;
@@ -149,12 +147,6 @@ char  buffer[3];
     MCP23017_command.get_count = 0;
     MCP23017_command.delay = 0;
     exec_command(&MCP23017_command, WRITE_ONLY);
-
-//    buffer[0] = regAddress;
-//    tmp_data.value16 = data;
-//    buffer[1] = tmp_data.value8[0];
-//    buffer[2] = tmp_data.value8[1];
-//   _i2c.write(MCP23017_i2cAddress, buffer, 3);
 }
 
 /*-----------------------------------------------------------------------------
@@ -169,10 +161,6 @@ int MCP23017_readRegister(uint8_t regAddress) {
     MCP23017_command.get_count = 1;
     MCP23017_command.delay = 0;
     exec_command(&MCP23017_command, WRITE_ONLY);
-
-//    buffer[0] = regAddress;
-//    _i2c.write(MCP23017_i2cAddress, buffer, 1);
-//    _i2c.read(MCP23017_i2cAddress, buffer, 2);
 
     return ((int)(buffer[0] + (buffer[1]<<8)));
 }
