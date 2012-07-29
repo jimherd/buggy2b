@@ -299,9 +299,12 @@ void init(void)
     MCP23017_write_bit(1,15);       // LED_4
 
 	TextLCD_init();
+	TextLCD_locate(0,0);
 	TextLCD_putc('K');
+	TextLCD_locate(1,3);
+	TextLCD_putc('4');
 
-   MCP23017_write_bit(1,14);       // LED_4
+    MCP23017_write_bit(1,14);       // LED_4
 
     return;
 }
