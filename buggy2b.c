@@ -61,7 +61,7 @@
 //    MCU         :   P18F4585
 //    Oscillator  :   HS, 40.0000MHz
 //    Software    :   Microchip C18 V3.36 Student Version
-//                :   MPLAB V7.31
+//                :   MPLAB V8.85
 //
 // Buggy spec
 //    1. WattBot I vehicle with PIC18F4585 device
@@ -128,6 +128,12 @@ enum {ADD} arith_ops;
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
+// System character strings
+//
+static char st1[] = "Int = ";
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 // Storage structure for vehicle sequence program
 //
 rom static struct  {
@@ -181,10 +187,11 @@ void exec_seq( uint8_t seq_start_no );
 //----------------------------------------------------------------------------
 // Program variables
 //
-int    vars[10];                          // user variables : vars[0] to vars[9]
-int    right_speed, left_speed;
-uint8_t  left_direction, right_direction;
-int    left_offset, right_offset;
+int    	vars[10];                          // user variables : vars[0] to vars[9]
+int    	right_speed, left_speed;
+uint8_t	left_direction, right_direction;
+int    	left_offset, right_offset;
+char	 tmp_string[20];
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
@@ -252,6 +259,7 @@ union PWMDC DCycle;
 //
 void init(void)
 {
+int tmp_int;
 //
 // Configure 2 PWM hardware subsystems for driving motors.
 //
@@ -300,9 +308,13 @@ void init(void)
 
 	TextLCD_init();
 	TextLCD_locate(0,0);
-	TextLCD_putc('K');
+	TextLCD_putstring(st1);
+	tmp_int = 43;
+	int16_to_string(tmp_string, tmp_int);
+	TextLCD_putstring(tmp_string);
 	TextLCD_locate(1,3);
-	TextLCD_putc('4');
+	TextLCD_putchar('4');
+	TextLCD_putchar('5');
 
     MCP23017_write_bit(1,14);       // LED_4
 

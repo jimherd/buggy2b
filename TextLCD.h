@@ -122,9 +122,10 @@ void TextLCD_cls(void);
 void TextLCD_reset();
         
 
-uint8_t TextLCD_putc(uint8_t c);        
-int _getc();
-void TextLCD_newline(void);      
+uint8_t TextLCD_putchar(uint8_t c);   
+void    TextLCD_putstring(const char* text);     
+void    TextLCD_newline(void); 
+uint8_t int16_to_string(char *str, int16_t num);
     
 void TextLCD_clock();
 void TextLCD_writeData(uint8_t data);

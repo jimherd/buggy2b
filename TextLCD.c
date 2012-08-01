@@ -38,20 +38,27 @@
  * D7 = 3  
  */
 
+//----------------------------------------------------------------------------
+// Global variables relating to the 16*2 LCD display
+//
 int _rows;
 int _columns;
 int _row;
-int _column;   
-
+int _column; 
+  
+//----------------------------------------------------------------------------
+// TextLCD_init : initialise display hardware
+// ============
+//
 void TextLCD_init(void) 
 {
 uint8_t  i;
 //
 // Initialise pointer to MCP23017 object
 //
-DelayMs(1);
+	DelayMs(1);
     MCP23017_config(0x0F00, 0x0F00, 0x0F00);
-DelayMs(1);    
+	DelayMs(1);    
     _rows = 2;
     _columns = 16;
 
@@ -60,7 +67,6 @@ DelayMs(1);
     TextLCD_rs(0); // command mode
     
     DelayMs(DISPLAY_INIT_DELAY_MSECS);     
-
 //
 // interface defaults to an 8-bit interface. However, we need to ensure that we
 // are in 8-bit mode. This code was included in the original MBED code. 
@@ -95,8 +101,11 @@ DelayMs(1);
     TextLCD_writeCommand(CMD_ENTRY_MODE | CURSOR_STEP_RIGHT | DISPLAY_SHIFT_OFF );                                // 0x06
     TextLCD_writeCommand(CMD_MODE_POWER | CHARACTER_MODE | INTERNAL_POWER_ON );                                   // 0x17
 }
-
-uint8_t TextLCD_putc(uint8_t value) {
+//----------------------------------------------------------------------------
+// TextLCD_putchar : output a single character to the current display cursor point
+// ===============
+//
+uint8_t TextLCD_putchar(uint8_t value) {
     if(value == '\n') {
         TextLCD_newline();
     } else {
@@ -105,7 +114,24 @@ uint8_t TextLCD_putc(uint8_t value) {
     return value;
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_put_string : output a null terminated string to the display
+// ==================
+//
+void   TextLCD_putstring(const char* text)
+{
+char  *ch_pt;
 
+    ch_pt = text;
+    while (*ch_pt != '\0') {
+        TextLCD_putchar(*ch_pt++);
+    }
+}
+
+//----------------------------------------------------------------------------
+// TextLCD_newline : move cursor to the start of the next line
+// ===============
+//
 void TextLCD_newline(void) 
 {
     _column = 0;
@@ -116,6 +142,45 @@ void TextLCD_newline(void)
     TextLCD_locate(_column, _row); 
 }
 
+//----------------------------------------------------------------------------
+// int16_to_string : convert INT16 to ASCII string
+// ===============
+//
+uint8_t int16_to_string(char *str, int16_t num) 
+{ 
+uint16_t   k; 
+char    c, *ostr;
+uint8_t   flag, ch_count;
+
+    ch_count = 0;
+	if (num < 0) { 
+		num = -num; 
+		*str++ = '-'; 
+        ch_count++;
+	} 
+	k = 10000; 
+	ostr = str;
+	flag = 0; 
+	while (k != 0) { 
+		c = num / k; 
+		if ((c > 0) || (k == 1) || (flag == 1)) { 
+			num %= k; 
+			c += '0'; 
+			*str++ = c; 
+            ch_count++;
+			flag = 1; 
+		} 
+		k /= 10; 
+	} 
+	*str = '\0'; 
+	return ch_count; 
+}
+
+
+//----------------------------------------------------------------------------
+// TextLCD_locate : move cursor to the specified (x,y) location
+// ==============
+//
 void TextLCD_locate(uint8_t row, uint8_t column) 
 {
 int  address;
@@ -131,23 +196,42 @@ int  address;
     TextLCD_writeCommand(address);            
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_cls : clear the display and set cursor to location (0,0)
+// ===========
+//
 void TextLCD_cls() {
     TextLCD_writeCommand(CMD_CLEAR_DISPLAY);  // 0x01
     DelayMs(DISPLAY_CLEAR_DELAY);        // 
     TextLCD_locate(0, 0);
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_reset : call to TextLCD_cls
+// =============
+//
 void TextLCD_reset(void) {
     TextLCD_cls();
 }
 
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// Internal low level routines
+//----------------------------------------------------------------------------
+// TextLCD_clock : generate a 40uS clock pulse for the display
+// =============
+//
 void TextLCD_clock(void) {
     DelayUs(40);
     TextLCD_e(1);
-    DelayUs(40);      // most instructions take 40us
+    DelayUs(40);
     TextLCD_e(0);    
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_writeNibble : write a 4-bit value to the display
+// ===================
+//
 void TextLCD_writeNibble(uint8_t value) {
 
     TextLCD_d(value); 
@@ -155,17 +239,29 @@ void TextLCD_writeNibble(uint8_t value) {
     TextLCD_clock();
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_writeByte : write an 8-bit value to the display
+// =================
+//
 void TextLCD_writeByte(uint8_t value) {
     TextLCD_writeNibble((value >> 4) & 0x000F);
     TextLCD_writeNibble((value >> 0) & 0x000F);
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_writeCommand : write an 8-bit command to the display
+// ====================
+//
 void TextLCD_writeCommand(uint8_t command) {
     TextLCD_rs(0);
     TextLCD_writeByte(command);
     DelayMs(DISPLAY_CMD_DELAY);
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_writeData : write an 8-bit data value to the display
+// =================
+//
 void TextLCD_writeData(uint8_t data) {
     TextLCD_rs(1);
     TextLCD_writeByte(data);
@@ -175,18 +271,34 @@ void TextLCD_writeData(uint8_t data) {
     } 
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_rs : write a 1-bit value to the display RS line
+// ==========
+//
 void TextLCD_rs(int data) {
     MCP23017_write_bit(data, RS_BIT);
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_rs : write a 1-bit value to the display RW line
+// ==========
+//
 void TextLCD_rw(int data) {
     MCP23017_write_bit(data, RW_BIT);
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_e : write a 1-bit value to the display enable line
+// =========
+//
 void TextLCD_e(int data) {
     MCP23017_write_bit(data, E_BIT);
 }
 
+//----------------------------------------------------------------------------
+// TextLCD_d : write a 1-bit value to the display 'd' line
+// ==========
+//
 void TextLCD_d(int data) {
     MCP23017_write_mask((unsigned short)data, (unsigned short)0x000F);
 }
